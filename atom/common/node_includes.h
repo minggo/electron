@@ -27,6 +27,7 @@
 #include "vendor/node/src/node.h"
 #include "vendor/node/src/node_buffer.h"
 #include "vendor/node/src/node_internals.h"
+#include "vendor/node/src/node_crypto.h"
 
 namespace atom {
 // Defined in node_bindings.cc.
