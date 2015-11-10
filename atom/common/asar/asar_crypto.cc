@@ -5,7 +5,7 @@
 
 namespace asar {
 
-bool CipherBase::DecryptData(char *indata, int inlen, unsigned char **outdata, int *outlen) {
+bool CipherBase::DecryptData(char **indata, int inlen) {
 
   asar::CipherBase *decrypt = new asar::CipherBase(asar::CipherBase::kDecipher);
   decrypt->Init(ALGORITHM, PASSWORD, strlen(PASSWORD));
@@ -16,7 +16,7 @@ bool CipherBase::DecryptData(char *indata, int inlen, unsigned char **outdata, i
   bool r = false;
   int update_out_len = 0;
  
-  r = decrypt->Update(indata, inlen, &update_out, &update_out_len);
+  r = decrypt->Update(*indata, inlen, &update_out, &update_out_len);
   if (!r) {
     delete[] update_out;
     delete decrypt;
@@ -46,25 +46,13 @@ bool CipherBase::DecryptData(char *indata, int inlen, unsigned char **outdata, i
     }
   }
 
-  // cancat the result
-  // header.resize(update_out_len + final_out_len);
-  // memcpy(header.data(), update_out, update_out_len);
-  // if (final_out_len != 0)
-  //   memcpy(header.data() + update_out_len, final_out, final_out_len);
-  if (final_out_len > 0) {
-    *outdata = new unsigned char[update_out_len + final_out_len];
-    memcpy(*outdata, update_out, update_out_len);
-    memcpy(*outdata + update_out_len, final_out, final_out_len);
+  // copy data
+  memcpy(*indata, update_out, update_out_len);
+  if (final_out_len > 0)
+    memcpy(*indata, final_out, final_out_len);
 
-    *outlen = update_out_len + final_out_len;
-    delete[] update_out;
-    delete[] final_out;
-  }
-  else {
-    *outdata = update_out;
-    *outlen = update_out_len;
-  }
-
+  delete[] update_out;
+  delete[] final_out;
   delete decrypt;
   return true;
 }

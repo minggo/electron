@@ -159,11 +159,7 @@ bool URLRequestAsarJob::ReadRawData(net::IOBuffer* dest,
     // decrypt js files
     if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js")) {
       char *indata = dest->data() + (file_info_.size - dest_size - remaining_bytes_);
-      unsigned char *outdata = nullptr;
-      int outlen = 0;
-      CipherBase::DecryptData(indata, dest_size, &outdata, &outlen);
-      memcpy(indata, outdata, outlen);
-      delete[] outdata;
+      CipherBase::DecryptData(&indata, dest_size);
     }
 
     return true;
@@ -342,11 +338,7 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
   // decrypt js files
   if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && result > 0) {
     char *indata = buf->data() + (file_info_.size - result - remaining_bytes_);
-    unsigned char *outdata = nullptr;
-    int outlen = 0;
-    CipherBase::DecryptData(indata, result, &outdata, &outlen);
-    memcpy(indata, outdata, outlen);
-    delete[] outdata;
+    CipherBase::DecryptData(&indata, result);
   }
 
   buf = NULL;

@@ -20,7 +20,7 @@ namespace asar {
 class CipherBase{
  public:
 
-  static bool DecryptData(char *indata, int inlen, unsigned char **outdata, int *outlen);
+  static bool DecryptData(char **indata, int inlen);
 
   ~CipherBase() {
     if (!initialised_)
