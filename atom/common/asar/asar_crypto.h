@@ -19,6 +19,9 @@ namespace asar {
 
 class CipherBase{
  public:
+
+  static bool DecryptData(char *indata, int inlen, unsigned char **outdata, int *outlen);
+
   ~CipherBase() {
     if (!initialised_)
       return;
@@ -26,7 +29,7 @@ class CipherBase{
     EVP_CIPHER_CTX_cleanup(&ctx_);
   }
 
- public:
+ private:
   enum CipherKind {
     kCipher,
     kDecipher

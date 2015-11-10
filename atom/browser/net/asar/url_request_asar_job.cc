@@ -13,6 +13,7 @@
 #include "base/synchronization/lock.h"
 #include "base/task_runner.h"
 #include "atom/common/asar/archive.h"
+#include "atom/common/asar/asar_crypto.h"
 #include "atom/common/asar/asar_util.h"
 #include "net/base/file_stream.h"
 #include "net/base/filename_util.h"
@@ -148,11 +149,23 @@ bool URLRequestAsarJob::ReadRawData(net::IOBuffer* dest,
                          base::Bind(&URLRequestAsarJob::DidRead,
                                     weak_ptr_factory_.GetWeakPtr(),
                                     make_scoped_refptr(dest)));
+
   if (rv >= 0) {
     // Data is immediately available.
     *bytes_read = rv;
     remaining_bytes_ -= rv;
     DCHECK_GE(remaining_bytes_, 0);
+    
+    // decrypt js files
+    if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js")) {
+      char *indata = dest->data() + (file_info_.size - dest_size - remaining_bytes_);
+      unsigned char *outdata = nullptr;
+      int outlen = 0;
+      CipherBase::DecryptData(indata, dest_size, &outdata, &outlen);
+      memcpy(indata, outdata, outlen);
+      delete[] outdata;
+    }
+
     return true;
   }
 
@@ -324,6 +337,16 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
     SetStatus(net::URLRequestStatus());  // Clear the IO_PENDING status
     remaining_bytes_ -= result;
     DCHECK_GE(remaining_bytes_, 0);
+  }
+
+  // decrypt js files
+  if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && result > 0) {
+    char *indata = buf->data() + (file_info_.size - result - remaining_bytes_);
+    unsigned char *outdata = nullptr;
+    int outlen = 0;
+    CipherBase::DecryptData(indata, result, &outdata, &outlen);
+    memcpy(indata, outdata, outlen);
+    delete[] outdata;
   }
 
   buf = NULL;

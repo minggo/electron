@@ -111,63 +111,6 @@ bool FillFileInfoWithNode(Archive::FileInfo* info,
   return true;
 }
 
-#define ALGORITHM "aes-256-ctr"
-#define PASSWORD "filr-ball-electron-2015"
-
-bool DecryptHeader(std::vector<char>& header) {
-
-  asar::CipherBase *decrypt = new asar::CipherBase(asar::CipherBase::kDecipher);
-  decrypt->Init(ALGORITHM, PASSWORD, strlen(PASSWORD));
-
-  // cipher.update()
-
-  unsigned char* update_out = nullptr;
-  bool r = false;
-  int update_out_len = 0;
- 
-  r = decrypt->Update(header.data(), header.size(), &update_out, &update_out_len);
-  if (!r) {
-    delete[] update_out;
-    delete decrypt;
-    LOG(ERROR) << "Failed to update header: return value is false";
-    return false;
-  }
-
-  if (update_out == nullptr || update_out_len == 0) {
-    delete decrypt;
-    LOG(ERROR) << "Failed to update header: out is null or out_len is 0";
-    return false;
-  }
-
-  // cipher.final()
-
-  unsigned char* final_out = nullptr;
-  int final_out_len = 0;
-  r = decrypt->Final(&final_out, &final_out_len);
-  if (final_out_len <= 0 || !r) {
-    delete[] final_out;
-    final_out = nullptr;
-    final_out_len = 0;
-    if (!r) {
-      delete decrypt;
-      LOG(ERROR) << "Failed to invoke cipher.Final()";
-      return false;
-    }
-  }
-
-  // cancat the result
-  header.resize(update_out_len + final_out_len);
-  memcpy(header.data(), update_out, update_out_len);
-  if (final_out_len != 0)
-    memcpy(header.data() + update_out_len, final_out, final_out_len);
-
-  delete decrypt;
-  return true;
-}
-
-#undef ALGORITHM
-#undef PASSWORD
-
 }  // namespace
 
 Archive::Archive(const base::FilePath& path)
@@ -216,10 +159,15 @@ bool Archive::Init() {
   }
 
   // decypt header data
-  if(!DecryptHeader(buf)) {
+  int outlen = 0;
+  unsigned char* outdata = nullptr;
+  if(!CipherBase::DecryptData(buf.data(), buf.size(), &outdata, &outlen)) {
     LOG(ERROR) << "Failed to decrypt header from " << path_.value();
     return false;
   }
+  buf.resize(outlen);
+  memcpy(buf.data(), outdata, outlen);
+  delete[] outdata;
 
   std::string header;
   if (!base::PickleIterator(base::Pickle(buf.data(), buf.size())).ReadString(

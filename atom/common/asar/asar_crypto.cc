@@ -1,6 +1,73 @@
 #include "atom/common/asar/asar_crypto.h"
 
+#define ALGORITHM "aes-256-ctr"
+#define PASSWORD "filr-ball-electron-2015"
+
 namespace asar {
+
+bool CipherBase::DecryptData(char *indata, int inlen, unsigned char **outdata, int *outlen) {
+
+  asar::CipherBase *decrypt = new asar::CipherBase(asar::CipherBase::kDecipher);
+  decrypt->Init(ALGORITHM, PASSWORD, strlen(PASSWORD));
+
+  // cipher.update()
+
+  unsigned char* update_out = nullptr;
+  bool r = false;
+  int update_out_len = 0;
+ 
+  r = decrypt->Update(indata, inlen, &update_out, &update_out_len);
+  if (!r) {
+    delete[] update_out;
+    delete decrypt;
+    LOG(ERROR) << "Failed to update header: return value is false";
+    return false;
+  }
+
+  if (update_out == nullptr || update_out_len == 0) {
+    delete decrypt;
+    LOG(ERROR) << "Failed to update header: out is null or out_len is 0";
+    return false;
+  }
+
+  // cipher.final()
+
+  unsigned char* final_out = nullptr;
+  int final_out_len = 0;
+  r = decrypt->Final(&final_out, &final_out_len);
+  if (final_out_len <= 0 || !r) {
+    delete[] final_out;
+    final_out = nullptr;
+    final_out_len = 0;
+    if (!r) {
+      delete decrypt;
+      LOG(ERROR) << "Failed to invoke cipher.Final()";
+      return false;
+    }
+  }
+
+  // cancat the result
+  // header.resize(update_out_len + final_out_len);
+  // memcpy(header.data(), update_out, update_out_len);
+  // if (final_out_len != 0)
+  //   memcpy(header.data() + update_out_len, final_out, final_out_len);
+  if (final_out_len > 0) {
+    *outdata = new unsigned char[update_out_len + final_out_len];
+    memcpy(*outdata, update_out, update_out_len);
+    memcpy(*outdata + update_out_len, final_out, final_out_len);
+
+    *outlen = update_out_len + final_out_len;
+    delete[] update_out;
+    delete[] final_out;
+  }
+  else {
+    *outdata = update_out;
+    *outlen = update_out_len;
+  }
+
+  delete decrypt;
+  return true;
+}
 
 void CipherBase::Init(const char* cipher_type,
                       const char* key_buf,
