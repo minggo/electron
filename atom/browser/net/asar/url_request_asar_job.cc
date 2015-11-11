@@ -158,11 +158,9 @@ bool URLRequestAsarJob::ReadRawData(net::IOBuffer* dest,
     DCHECK_GE(remaining_bytes_, 0);
     
     // decrypt js files
-    if (type_ == TYPE_ASAR && base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && rv > 0) {
-      // char *indata = dest->data() + (file_info_.size - rv - remaining_bytes_);
-      // CipherBase::DecryptData(indata, rv);
-      // CipherBase::DecryptData(dest->data(), rv);
-
+    if (type_ == TYPE_ASAR && 
+        base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") &&
+        rv > 0) {
       DecryptData(dest, rv);
     }
 
@@ -343,10 +341,6 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
   if (type_ == TYPE_ASAR && 
       base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && 
       result > 0) {
-    // char *indata = buf->data() + (file_info_.size - result - remaining_bytes_);
-    // CipherBase::DecryptData(indata, result);
-    // CipherBase::DecryptData(buf->data(), result);
-
     DecryptData(buf.get(), result);
   }
 
@@ -361,6 +355,9 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
   NotifyReadComplete(result);
 }
 
+/** Decrypt a file should start from the beginning of the file. So if a file is readed many times,
+ * then we should decrypt it from start every time. Which means we should cache the file content by ourself.
+ */
 void URLRequestAsarJob::DecryptData(net::IOBuffer *buf, int size) {
   // read all data in one URLRequestAsarJob::ReadRawData() call
   if (first_read_) {
@@ -373,6 +370,7 @@ void URLRequestAsarJob::DecryptData(net::IOBuffer *buf, int size) {
     first_read_ = false;
   } 
   else {
+    // should cache the file content and decrypt from start every time
     size_t original_size = inner_buf_.size();
     inner_buf_.resize(original_size + size);
     memcpy(inner_buf_.data() + original_size, buf->data(), size);

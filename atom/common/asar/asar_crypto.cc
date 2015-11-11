@@ -20,13 +20,13 @@ bool CipherBase::DecryptData(char *indata, int inlen) {
   if (!r) {
     delete[] update_out;
     delete decrypt;
-    LOG(ERROR) << "Failed to update header: return value is false";
+    LOG(ERROR) << "Failed to update data: return value is false";
     return false;
   }
 
   if (update_out == nullptr || update_out_len == 0) {
     delete decrypt;
-    LOG(ERROR) << "Failed to update header: out is null or out_len is 0";
+    LOG(ERROR) << "Failed to update data: update_out is null or out_len is 0";
     return false;
   }
 
