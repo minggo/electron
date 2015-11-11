@@ -12,7 +12,7 @@ need_decrypt = (file_path) ->
     return false
 
 decrypt_buffer = (buffer) ->
-  ALGORITHM = 'aes-256-ctr'
+  ALGORITHM = 'rc4'
   PASSWORD = 'filr-ball-electron-2015'
   decipher = crypto.createDecipher ALGORITHM, PASSWORD
   Buffer.concat [decipher.update(buffer), decipher.final()]

@@ -1,11 +1,11 @@
 #include "atom/common/asar/asar_crypto.h"
 
-#define ALGORITHM "aes-256-ctr"
+#define ALGORITHM "rc4"
 #define PASSWORD "filr-ball-electron-2015"
 
 namespace asar {
 
-bool CipherBase::DecryptData(char **indata, int inlen) {
+bool CipherBase::DecryptData(char *indata, int inlen) {
 
   asar::CipherBase *decrypt = new asar::CipherBase(asar::CipherBase::kDecipher);
   decrypt->Init(ALGORITHM, PASSWORD, strlen(PASSWORD));
@@ -16,7 +16,7 @@ bool CipherBase::DecryptData(char **indata, int inlen) {
   bool r = false;
   int update_out_len = 0;
  
-  r = decrypt->Update(*indata, inlen, &update_out, &update_out_len);
+  r = decrypt->Update(indata, inlen, &update_out, &update_out_len);
   if (!r) {
     delete[] update_out;
     delete decrypt;
@@ -47,9 +47,9 @@ bool CipherBase::DecryptData(char **indata, int inlen) {
   }
 
   // copy data
-  memcpy(*indata, update_out, update_out_len);
+  memcpy(indata, update_out, update_out_len);
   if (final_out_len > 0)
-    memcpy(*indata, final_out, final_out_len);
+    memcpy(indata + update_out_len, final_out, final_out_len);
 
   delete[] update_out;
   delete[] final_out;

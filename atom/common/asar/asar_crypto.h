@@ -20,7 +20,8 @@ namespace asar {
 class CipherBase{
  public:
 
-  static bool DecryptData(char **indata, int inlen);
+  // Decrypt indata can copy the decrypted data to `indata`, it supposed the length of decrypted data is the same as non-decrypted
+  static bool DecryptData(char *indata, int inlen);
 
   ~CipherBase() {
     if (!initialised_)

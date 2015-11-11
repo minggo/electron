@@ -159,12 +159,10 @@ bool Archive::Init() {
   }
 
   // decypt header data
-  char *data = buf.data();
-  if (!CipherBase::DecryptData(&data, buf.size())) {
+  if (!CipherBase::DecryptData(buf.data(), buf.size())) {
     LOG(ERROR) << "Failed to decrypt header from " << path_.value();
     return false;
   }
-  // memcpy(buf.data(), data, buf.size());
 
   std::string header;
   if (!base::PickleIterator(base::Pickle(buf.data(), buf.size())).ReadString(

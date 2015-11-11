@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "atom/browser/net/js_asker.h"
 #include "atom/common/asar/archive.h"
@@ -100,6 +101,9 @@ class URLRequestAsarJob : public net::URLRequestJob {
   // Callback after data is asynchronously read from the file into |buf|.
   void DidRead(scoped_refptr<net::IOBuffer> buf, int result);
 
+  // Decrypt data
+  void DecryptData(net::IOBuffer *buf, int size);
+
   // The type of this job.
   enum JobType {
     TYPE_ERROR,
@@ -120,6 +124,9 @@ class URLRequestAsarJob : public net::URLRequestJob {
   int64 remaining_bytes_;
 
   base::WeakPtrFactory<URLRequestAsarJob> weak_ptr_factory_;
+
+  bool first_read_;
+  std::vector<char> inner_buf_;
 
   DISALLOW_COPY_AND_ASSIGN(URLRequestAsarJob);
 };

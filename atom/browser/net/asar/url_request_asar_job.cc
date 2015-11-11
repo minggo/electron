@@ -44,7 +44,8 @@ URLRequestAsarJob::URLRequestAsarJob(
     : net::URLRequestJob(request, network_delegate),
       type_(TYPE_ERROR),
       remaining_bytes_(0),
-      weak_ptr_factory_(this) {}
+      weak_ptr_factory_(this),
+      first_read_(true){}
 
 URLRequestAsarJob::~URLRequestAsarJob() {}
 
@@ -157,9 +158,12 @@ bool URLRequestAsarJob::ReadRawData(net::IOBuffer* dest,
     DCHECK_GE(remaining_bytes_, 0);
     
     // decrypt js files
-    if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js")) {
-      char *indata = dest->data() + (file_info_.size - dest_size - remaining_bytes_);
-      CipherBase::DecryptData(&indata, dest_size);
+    if (type_ == TYPE_ASAR && base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && rv > 0) {
+      // char *indata = dest->data() + (file_info_.size - rv - remaining_bytes_);
+      // CipherBase::DecryptData(indata, rv);
+      // CipherBase::DecryptData(dest->data(), rv);
+
+      DecryptData(dest, rv);
     }
 
     return true;
@@ -336,9 +340,14 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
   }
 
   // decrypt js files
-  if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && result > 0) {
-    char *indata = buf->data() + (file_info_.size - result - remaining_bytes_);
-    CipherBase::DecryptData(&indata, result);
+  if (type_ == TYPE_ASAR && 
+      base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && 
+      result > 0) {
+    // char *indata = buf->data() + (file_info_.size - result - remaining_bytes_);
+    // CipherBase::DecryptData(indata, result);
+    // CipherBase::DecryptData(buf->data(), result);
+
+    DecryptData(buf.get(), result);
   }
 
   buf = NULL;
@@ -350,6 +359,28 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
   }
 
   NotifyReadComplete(result);
+}
+
+void URLRequestAsarJob::DecryptData(net::IOBuffer *buf, int size) {
+  // read all data in one URLRequestAsarJob::ReadRawData() call
+  if (first_read_) {
+    if (remaining_bytes_ != 0) {
+      inner_buf_.resize(size);
+      memcpy(inner_buf_.data(), buf->data(), size);
+    }
+
+    CipherBase::DecryptData(buf->data(), size);
+    first_read_ = false;
+  } 
+  else {
+    size_t original_size = inner_buf_.size();
+    inner_buf_.resize(original_size + size);
+    memcpy(inner_buf_.data() + original_size, buf->data(), size);
+
+    CipherBase::DecryptData(inner_buf_.data(), inner_buf_.size());
+    memcpy(buf->data(), inner_buf_.data() + original_size, size);
+  }
+
 }
 
 }  // namespace asar
