@@ -1,7 +1,7 @@
 {
   "name": "electron",
   "devDependencies": {
-    "asar": "minggo/asar#v0.8.2-encrypt",
+    "asar": "fireball-x/asar#v0.8.2-encrypt",
     "coffee-script": "^1.9.2",
     "coffeelint": "^1.9.4",
     "request": "*"
