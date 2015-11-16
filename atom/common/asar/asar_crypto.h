@@ -20,8 +20,12 @@ namespace asar {
 class CipherBase{
  public:
 
-  // Decrypt indata can copy the decrypted data to `indata`, it supposed the length of decrypted data is the same as non-decrypted
+  // Decrypt indata can copy the decrypted data to `indata`, it supposed the length of decrypted data is the same as non-decrypted.
+  // It will create a new CipherBase every time, so it is used in the situation that all data ready in indata.
   static bool DecryptData(char *indata, int inlen);
+
+  // create and initialization
+  static CipherBase* CreateDecipher();
 
   ~CipherBase() {
     if (!initialised_)
@@ -30,11 +34,23 @@ class CipherBase{
     EVP_CIPHER_CTX_cleanup(&ctx_);
   }
 
+  // Invoke internal Update() and do some error handling.
+  // It will invoke internal final() if `invoke_final` is true.
+  bool Update(char *indata, int inlen, bool invoke_final);
+
  private:
+
   enum CipherKind {
     kCipher,
     kDecipher
   };
+  CipherBase(CipherKind kind)
+      : cipher_(nullptr),
+        initialised_(false),
+        kind_(kind),
+        auth_tag_(nullptr),
+        auth_tag_len_(0) {
+  }
 
   void Init(const char* cipher_type, const char* key_buf, int key_buf_len);
   void InitIv(const char* cipher_type,
@@ -50,14 +66,6 @@ class CipherBase{
   bool GetAuthTag(char** out, unsigned int* out_len) const;
   bool SetAuthTag(const char* data, unsigned int len);
   bool SetAAD(const char* data, unsigned int len);
-
-  CipherBase(CipherKind kind)
-      : cipher_(nullptr),
-        initialised_(false),
-        kind_(kind),
-        auth_tag_(nullptr),
-        auth_tag_len_(0) {
-  }
 
  private:
   EVP_CIPHER_CTX ctx_; /* coverity[member_decl] */

@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "atom/browser/net/js_asker.h"
 #include "atom/common/asar/archive.h"
@@ -26,6 +25,8 @@ class FileStream;
 }
 
 namespace asar {
+
+class CipherBase;
 
 // Createa a request job according to the file path.
 net::URLRequestJob* CreateJobFromPath(
@@ -125,8 +126,7 @@ class URLRequestAsarJob : public net::URLRequestJob {
 
   base::WeakPtrFactory<URLRequestAsarJob> weak_ptr_factory_;
 
-  bool first_read_;
-  std::vector<char> inner_buf_;
+  CipherBase *decipher_;
 
   DISALLOW_COPY_AND_ASSIGN(URLRequestAsarJob);
 };
