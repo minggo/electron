@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "atom/common/asar/scoped_temporary_file.h"
+#include "atom/common/asar/asar_crypto.h"
 #include "base/files/file.h"
 #include "base/logging.h"
 #include "base/pickle.h"
@@ -157,6 +158,12 @@ bool Archive::Init() {
     return false;
   }
 
+  // decypt header data
+  if (!CipherBase::DecryptData(buf.data(), buf.size())) {
+    LOG(ERROR) << "Failed to decrypt header from " << path_.value();
+    return false;
+  }
+
   std::string header;
   if (!base::PickleIterator(base::Pickle(buf.data(), buf.size())).ReadString(
         &header)) {
@@ -269,7 +276,7 @@ bool Archive::CopyFileOut(const base::FilePath& path, base::FilePath* out) {
     return true;
   }
 
-  scoped_ptr<ScopedTemporaryFile> temp_file(new ScopedTemporaryFile);
+  scoped_ptr<ScopedTemporaryFile> temp_file(new ScopedTemporaryFile(path));
   if (!temp_file->InitFromFile(&file_, info.offset, info.size))
     return false;
 

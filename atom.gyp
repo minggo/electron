@@ -248,6 +248,7 @@
         '<(SHARED_INTERMEDIATE_DIR)',
         # Include directories for uv and node.
         'vendor/node/src',
+        'vendor/node/deps/openssl/openssl/include',
         'vendor/node/deps/http_parser',
         'vendor/node/deps/uv/include',
         # The `node.h` is using `#include"v8.h"`.
