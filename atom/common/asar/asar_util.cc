@@ -11,6 +11,7 @@
 #include "atom/common/asar/asar_crypto.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
+#include "base/strings/string_util.h"
 #include "base/lazy_instance.h"
 #include "base/stl_util.h"
 
@@ -87,8 +88,11 @@ bool ReadFileToString(const base::FilePath& path, std::string* contents) {
   // return static_cast<int>(info.size) == src.Read(
   //     info.offset, const_cast<char*>(contents->data()), contents->size());
 
+  // decrypt js data
   int read_size = src.Read(info.offset, const_cast<char*>(contents->data()), contents->size());
-  CipherBase::DecryptData(const_cast<char*>(contents->data()), read_size);
+  if (base::LowerCaseEqualsASCII(path.Extension(), ".js")) 
+    CipherBase::DecryptData(const_cast<char*>(contents->data()), read_size);
+  
   return static_cast<int>(info.size) == read_size;
 }
 
