@@ -1,9 +1,12 @@
 {
   "name": "electron",
   "devDependencies": {
-    "asar": "fireball-x/asar#v0.8.2-encrypt",
-    "coffee-script": "^1.9.2",
-    "coffeelint": "^1.9.4",
+    "asar": "fireball-x/asar",
+    "coffee-script": "1.9.2",
+    "coffeelint": "1.9.4",
+    "ftp": "0.3.10",
+    "gulp": "3.9.0",
+    "gulp-sequence": "0.4.1",
     "request": "*"
   },
   "optionalDependencies": {
