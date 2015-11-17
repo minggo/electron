@@ -102,7 +102,7 @@ def main():
 
 def force_build():
   build = os.path.join(SOURCE_ROOT, 'script', 'build.py')
-  execute([sys.executable, build, '-c', 'Release'])
+  subprocess.call([sys.executable, build, '-c', 'Release'])
 
 
 def copy_binaries():
