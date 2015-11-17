@@ -16,6 +16,12 @@ gulp.task('build-release', function(cb) {
     cb();
 });
 
+gulp.task('update', function(cb) {
+    var execCmd = 'python ' + Path.join('script', 'update.py');
+    Utils.execSync(execCmd, '.');
+    cb();    
+});
+ 
 gulp.task('create-dist', function(cb) {
     var execCmd = 'python ' + Path.join('script', 'create-dist.py');
     Utils.execSync(execCmd, '.');
@@ -42,4 +48,4 @@ gulp.task('upload-dist-ftp', function(cb) {
     });
 });
 
-gulp.task('auto-dist', gulpSequence('create-dist', 'upload-dist-ftp'));
+gulp.task('auto-dist', gulpSequence('update', 'create-dist', 'upload-dist-ftp'));
