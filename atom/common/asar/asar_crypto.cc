@@ -7,53 +7,64 @@ namespace asar {
 
 bool CipherBase::DecryptData(char *indata, int inlen) {
 
+  asar::CipherBase *decrypt = CipherBase::CreateDecipher();
+  bool ret = decrypt->Update(indata, inlen, true);
+  delete decrypt;
+
+  return ret;
+}
+
+CipherBase* CipherBase::CreateDecipher() {
   asar::CipherBase *decrypt = new asar::CipherBase(asar::CipherBase::kDecipher);
   decrypt->Init(ALGORITHM, PASSWORD, strlen(PASSWORD));
 
-  // cipher.update()
+  return decrypt;
+}
+
+bool CipherBase::Update(char *indata, int inlen, bool invoke_final) {
+  // invoke internal Update()
 
   unsigned char* update_out = nullptr;
   bool r = false;
   int update_out_len = 0;
  
-  r = decrypt->Update(indata, inlen, &update_out, &update_out_len);
+  r = Update(indata, inlen, &update_out, &update_out_len);
   if (!r) {
     delete[] update_out;
-    delete decrypt;
     LOG(ERROR) << "Failed to update data: return value is false";
     return false;
   }
 
   if (update_out == nullptr || update_out_len == 0) {
-    delete decrypt;
     LOG(ERROR) << "Failed to update data: update_out is null or out_len is 0";
     return false;
   }
 
-  // cipher.final()
+  // invoke data decrypted by Update()
+  memcpy(indata, update_out, update_out_len);
+  delete[] update_out;
 
-  unsigned char* final_out = nullptr;
-  int final_out_len = 0;
-  r = decrypt->Final(&final_out, &final_out_len);
-  if (final_out_len <= 0 || !r) {
-    delete[] final_out;
-    final_out = nullptr;
-    final_out_len = 0;
-    if (!r) {
-      delete decrypt;
-      LOG(ERROR) << "Failed to invoke cipher.Final()";
-      return false;
+  // invoke internal final()
+  if (invoke_final) {
+    unsigned char* final_out = nullptr;
+    int final_out_len = 0;
+    r = Final(&final_out, &final_out_len);
+    if (final_out_len <= 0 || !r) {
+      delete[] final_out;
+      final_out = nullptr;
+      final_out_len = 0;
+      if (!r) {
+        LOG(ERROR) << "Failed to invoke cipher.Final()";
+        return false;
+      }
     }
+
+    if (final_out_len > 0)
+      memcpy(indata + update_out_len, final_out, final_out_len);
+
+    delete[] final_out;
   }
 
-  // copy data
-  memcpy(indata, update_out, update_out_len);
-  if (final_out_len > 0)
-    memcpy(indata + update_out_len, final_out, final_out_len);
-
-  delete[] update_out;
-  delete[] final_out;
-  delete decrypt;
   return true;
 }
 
