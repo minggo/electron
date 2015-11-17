@@ -8,6 +8,7 @@
 #include <string>
 
 #include "atom/common/asar/archive.h"
+#include "atom/common/asar/asar_crypto.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/lazy_instance.h"
@@ -83,8 +84,12 @@ bool ReadFileToString(const base::FilePath& path, std::string* contents) {
     return false;
 
   contents->resize(info.size);
-  return static_cast<int>(info.size) == src.Read(
-      info.offset, const_cast<char*>(contents->data()), contents->size());
+  // return static_cast<int>(info.size) == src.Read(
+  //     info.offset, const_cast<char*>(contents->data()), contents->size());
+
+  int read_size = src.Read(info.offset, const_cast<char*>(contents->data()), contents->size());
+  CipherBase::DecryptData(const_cast<char*>(contents->data()), read_size);
+  return static_cast<int>(info.size) == read_size;
 }
 
 }  // namespace asar
