@@ -82,10 +82,10 @@ def main():
   target_arch = get_target_arch()
 
   force_build()
-  create_symbols()
+  # create_symbols()
   copy_binaries()
-  copy_chrome_binary('chromedriver')
-  copy_chrome_binary('mksnapshot')
+  # copy_chrome_binary('chromedriver')
+  # copy_chrome_binary('mksnapshot')
   copy_license()
 
   if PLATFORM == 'linux':
@@ -95,9 +95,9 @@ def main():
 
   create_version()
   create_dist_zip()
-  create_chrome_binary_zip('chromedriver', get_chromedriver_version())
-  create_chrome_binary_zip('mksnapshot', ATOM_SHELL_VERSION)
-  create_symbols_zip()
+  # create_chrome_binary_zip('chromedriver', get_chromedriver_version())
+  # create_chrome_binary_zip('mksnapshot', ATOM_SHELL_VERSION)
+  # create_symbols_zip()
 
 
 def force_build():
