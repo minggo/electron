@@ -1,8 +1,10 @@
-var Fs = require('fs');
+var Fs = require('fire-fs');
 var Path = require('path');
 var gulp = require('gulp');
 var Utils = require('./script/fireball/utils');
 var gulpSequence = require('gulp-sequence');
+var AdmZip = require('adm-zip');
+var Del = require('del');
 
 gulp.task('build-debug', function(cb) {
     var execCmd = 'python ' + Path.join('script', 'build.py') + ' -c D';
@@ -21,11 +23,53 @@ gulp.task('update', function(cb) {
     Utils.execSync(execCmd, '.');
     cb();    
 });
+
+gulp.task('bootstrap', function(cb) {
+    Utils.execSync('python script/bootstrap.py -v --target_arch=x64');
+    cb();
+});
+
+gulp.task('show-download-url', function(cb) {
+    Utils.execSync('python script/show-url.py');
+    cb();
+});
  
 gulp.task('create-dist', function(cb) {
     var execCmd = 'python ' + Path.join('script', 'create-dist.py');
     Utils.execSync(execCmd, '.');
     cb();
+});
+
+gulp.task('sync-submodule', function(cb) {
+    Utils.execSync('git submodule sync', '.');
+    cb();
+});
+
+gulp.task('update-submodule', function(cb) {
+    Utils.execSync('git submodule update --init --recursive', '.');
+    cb();
+});
+
+gulp.task('extract-libchromiumcontent', function(cb) {
+    var srcDynamic = Path.join('download', 'libchromiumcontent.zip');
+    var srcStatic = Path.join('download', 'libchromiumcontent-static.zip');
+    if (Fs.existsSync(srcDynamic) === false ||
+        Fs.existsSync(srcStatic) === false) {
+        console.log("Please make sure you have downloaded libchromiumcontent from AWS and put it to ./download folder.");
+        process.exit(1);
+        return;
+    }
+    var destPath = 'vendor/brightray/vendor/download/libchromiumcontent';
+    Del(destPath).then(function() {
+        console.log('cleaned target folder: ' + destPath);
+        Fs.ensureDirSync(destPath);
+        var zipDynamic = new AdmZip(srcDynamic);
+        zipDynamic.extractAllTo(destPath, true);
+        var zipStatic = new AdmZip(srcStatic);
+        zipStatic.extractAllTo(destPath, true);
+        Fs.writeFileSync(Path.join(destPath, '.version'), '', {encoding:'utf8'});
+        cb();
+    });
 });
 
 gulp.task('upload-dist-ftp', function(cb) {
@@ -49,3 +93,5 @@ gulp.task('upload-dist-ftp', function(cb) {
 });
 
 gulp.task('auto-dist', gulpSequence('update', 'create-dist', 'upload-dist-ftp'));
+
+gulp.task('init-with-external-download', gulpSequence('sync-submodule', 'update-submodule', 'extract-libchromiumcontent', 'bootstrap'));
