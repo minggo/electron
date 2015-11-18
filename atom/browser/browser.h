@@ -11,12 +11,12 @@
 #include "base/basictypes.h"
 #include "base/compiler_specific.h"
 #include "base/observer_list.h"
+#include "base/strings/string16.h"
 #include "atom/browser/browser_observer.h"
 #include "atom/browser/window_list_observer.h"
 
 #if defined(OS_WIN)
 #include "base/files/file_path.h"
-#include "base/strings/string16.h"
 #endif
 
 namespace base {
@@ -42,6 +42,9 @@ class Browser : public WindowListObserver {
   // Try to close all windows and quit the application.
   void Quit();
 
+  // Exit the application immediately and set exit code.
+  void Exit(int code);
+
   // Cleanup everything and shutdown the application gracefully.
   void Shutdown();
 
@@ -65,6 +68,9 @@ class Browser : public WindowListObserver {
 
   // Clear the recent documents list.
   void ClearRecentDocuments();
+
+  // Set the application user model ID.
+  void SetAppUserModelID(const base::string16& name);
 
 #if defined(OS_MACOSX)
   // Bounce the dock icon.
@@ -100,8 +106,10 @@ class Browser : public WindowListObserver {
   // Add a custom task to jump list.
   void SetUserTasks(const std::vector<UserTask>& tasks);
 
-  // Set the application user model ID, called when "SetName" is called.
-  void SetAppUserModelID(const std::string& name);
+  // Returns the application user model ID, if there isn't one, then create
+  // one from app's name.
+  // The returned string managed by Browser, and should not be modified.
+  PCWSTR GetAppUserModelID();
 #endif
 
   // Tell the application to open a file.

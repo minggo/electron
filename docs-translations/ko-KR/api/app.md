@@ -5,7 +5,7 @@
 밑의 예제는 마지막 윈도우창가 종료되었을 때, 어플리케이션을 종료시키는 예제입니다:
 
 ```javascript
-var app = require('app');
+const app = require('electron').app;
 app.on('window-all-closed', function() {
   app.quit();
 });
@@ -206,6 +206,14 @@ GPU가 작동하던 중 크래시가 일어났을 때 발생하는 이벤트입�
 이 함수는 모든 `beforeunload`와 `unload` 이벤트 핸들러가 제대로 실행됨을 보장합니다.
 `beforeunload` 이벤트 핸들러에서 `false`를 반환했을 때 윈도우창 종료가 취소 될 수 있습니다.
 
+### `app.exit(exitCode)`
+
+* `exitCode` Integer
+
+`exitCode`와 함께 어플리케이션을 즉시 종료합니다.
+
+모든 윈도우창은 사용자의 동의 여부에 상관없이 즉시 종료되며 `before-quit` 이벤트와 `will-quit` 이벤트가 발생하지 않습니다.
+
 ### `app.getAppPath()`
 
 현재 어플리케이션의 디렉터리를 반환합니다.
@@ -232,6 +240,12 @@ GPU가 작동하던 중 크래시가 일어났을 때 발생하는 이벤트입�
 * `userDesktop` - 현재 사용자의 데스트탑 디렉터리.
 * `exe` - 현재 실행중인 Electron 바이너리 파일.
 * `module` - `libchromiumcontent` 라이브러리.
+* `desktop` - 사용자의 데스크탑 디렉터리.
+* `documents` - 사용자의 "내 문서" 디렉터리.
+* `downloads` - 사용자의 다운로드 디렉터리.
+* `music` - 사용자의 음악 디렉터리.
+* `pictures` - 사용자의 사진 디렉터리.
+* `videos` - 사용자의 동영상 디렉터리.
 
 ### `app.setPath(name, path)`
 
@@ -362,6 +376,12 @@ app.on('ready', function() {
 });
 ```
 
+### `app.setAppUserModelId(id)` _Windows_
+
+* `id` String
+
+[Application User Model ID][app-user-model-id]를 `id`로 변경합니다.
+
 ### `app.commandLine.appendSwitch(switch[, value])`
 
 Chrominum의 명령줄에 스위치를 추가합니다. `value`는 추가적인 값을 뜻하며 옵션입니다.
@@ -418,3 +438,4 @@ dock 아이콘을 표시합니다.
 
 [dock-menu]:https://developer.apple.com/library/mac/documentation/Carbon/Conceptual/customizing_docktile/concepts/dockconcepts.html#//apple_ref/doc/uid/TP30000986-CH2-TPXREF103
 [tasks]:http://msdn.microsoft.com/en-us/library/windows/desktop/dd378460(v=vs.85).aspx#tasks
+[app-user-model-id]: https://msdn.microsoft.com/en-us/library/windows/desktop/dd378459(v=vs.85).aspx

@@ -6,7 +6,7 @@ The following example shows how to quit the application when the last window is
 closed:
 
 ```javascript
-var app = require('app');
+const app = require('electron').app;
 app.on('window-all-closed', function() {
   app.quit();
 });
@@ -208,6 +208,15 @@ This method guarantees that all `beforeunload` and `unload` event handlers are
 correctly executed. It is possible that a window cancels the quitting by
 returning `false` in the `beforeunload` event handler.
 
+### `app.exit(exitCode)`
+
+* `exitCode` Integer
+
+Exits immediately with `exitCode`.
+
+All windows will be closed immediately without asking user and the `before-quit`
+and `will-quit` events will not be emitted.
+
 ### `app.getAppPath()`
 
 Returns the current application directory.
@@ -229,9 +238,14 @@ You can request the following paths by the name:
 * `userData` The directory for storing your app's configuration files, which by
   default it is the `appData` directory appended with your app's name.
 * `temp` Temporary directory.
-* `userDesktop` The current user's Desktop directory.
 * `exe` The current executable file.
 * `module` The `libchromiumcontent` library.
+* `desktop` The current user's Desktop directory.
+* `documents` Directory for a user's "My Documents".
+* `downloads` Directory for a user's downloads.
+* `music` Directory for a user's music.
+* `pictures` Directory for a user's pictures.
+* `videos` Directory for a user's videos.
 
 ### `app.setPath(name, path)`
 
@@ -375,6 +389,12 @@ app.on('ready', function() {
 });
 ```
 
+### `app.setAppUserModelId(id)` _Windows_
+
+* `id` String
+
+Changes the [Application User Model ID][app-user-model-id] to `id`.
+
 ### `app.commandLine.appendSwitch(switch[, value])`
 
 Append a switch (with optional `value`) to Chromium's command line.
@@ -435,3 +455,4 @@ Sets the application's [dock menu][dock-menu].
 
 [dock-menu]:https://developer.apple.com/library/mac/documentation/Carbon/Conceptual/customizing_docktile/concepts/dockconcepts.html#//apple_ref/doc/uid/TP30000986-CH2-TPXREF103
 [tasks]:http://msdn.microsoft.com/en-us/library/windows/desktop/dd378460(v=vs.85).aspx#tasks
+[app-user-model-id]: https://msdn.microsoft.com/en-us/library/windows/desktop/dd378459(v=vs.85).aspx

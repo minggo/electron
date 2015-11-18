@@ -156,7 +156,7 @@ webview.addEventListener("dom-ready", function() {
 });
 ```
 
-### `<webview>.getUrl()`
+### `<webview>.getURL()`
 
 페이지의 URL을 반환합니다.
 
@@ -333,15 +333,15 @@ Webview 페이지를 인쇄합니다. `webContents.print([options])` 메서드�
 
 Webview 페이지를 PDF 형식으로 인쇄합니다. `webContents.printToPDF(options, callback)` 메서드와 같습니다.
 
-### `<webview>.send(channel[, args...])`
+### `<webview>.send(channel[, arg1][, arg2][, ...])`
 
 * `channel` String
 * `args` (optional)
 
-`channel`을 통해 페이지에 `args` 비동기 메시지를 보냅니다.
-페이지에선 `ipc` 모듈의 `channel` 이벤트를 사용하면 이 메시지를 받을 수 있습니다.
+`channel`을 통해 랜더러 프로세스로 비동기 메시지를 보냅니다. 또한 `args`를 지정하여 임의의 인자를 보낼 수도 있습니다.
+랜더러 프로세스는 `ipcRenderer` 모듈의 `channel` 이벤트로 이 메시지를 받아 처리할 수 있습니다.
 
-예제는 [WebContents.send](web-contents.md#webcontentssendchannel-args)를 참고하세요.
+예제는 [webContents.send](web-contents.md#webcontentssendchannel-args)를 참고하세요.
 
 ### `<webview>.sendInputEvent(event)`
 
@@ -349,7 +349,7 @@ Webview 페이지를 PDF 형식으로 인쇄합니다. `webContents.printToPDF(o
 
 페이지에 input `event`를 보냅니다.
 
-`event` 객체에 대해 자세한 내용을 알아보려면 [WebContents.sendInputEvent](web-contents.md##webcontentssendinputeventevent)를 참고하세요.
+`event` 객체에 대해 자세히 알아보려면 [webContents.sendInputEvent](web-contents.md##webcontentssendinputeventevent)를 참고하세요.
 
 ## DOM 이벤트
 
@@ -376,7 +376,7 @@ Returns:
 
 * `errorCode` Integer
 * `errorDescription` String
-* `validatedUrl` String
+* `validatedURL` String
 
 `did-finish-load`와 비슷합니다. 하지만 이 이벤트는 `window.stop()`과 같은 무언가로 인해 로드에 실패했을 때 발생하는 이벤트입니다.
 
@@ -401,8 +401,8 @@ Returns:
 Returns:
 
 * `status` Boolean
-* `newUrl` String
-* `originalUrl` String
+* `newURL` String
+* `originalURL` String
 * `httpResponseCode` Integer
 * `requestMethod` String
 * `referrer` String
@@ -415,8 +415,8 @@ Returns:
 
 Returns:
 
-* `oldUrl` String
-* `newUrl` String
+* `oldURL` String
+* `newURL` String
 * `isMainFrame` Boolean
 
 리소스를 요청하고 받는 도중에 리다이렉트가 생기면 발생하는 이벤트입니다.
@@ -484,7 +484,7 @@ Returns:
 
 ```javascript
 webview.addEventListener('new-window', function(e) {
-  require('shell').openExternal(e.url);
+  require('electron').shell.openExternal(e.url);
 });
 ```
 
@@ -522,9 +522,9 @@ webview.send('ping');
 
 ```javascript
 // In guest page.
-var ipc = require('ipc');
-ipc.on('ping', function() {
-  ipc.sendToHost('pong');
+var ipcRenderer = require('electron').ipcRenderer;
+ipcRenderer.on('ping', function() {
+  ipcRenderer.sendToHost('pong');
 });
 ```
 
