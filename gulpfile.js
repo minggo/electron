@@ -3,7 +3,6 @@ var Path = require('path');
 var gulp = require('gulp');
 var Utils = require('./script/fireball/utils');
 var gulpSequence = require('gulp-sequence');
-var AdmZip = require('adm-zip');
 var Del = require('del');
 
 gulp.task('build-debug', function(cb) {
@@ -50,6 +49,13 @@ gulp.task('update-submodule', function(cb) {
     cb();
 });
 
+function get_libchromiumcontent_commit_hash() {
+    var config = Fs.readFileSync(Path.join('script','lib','config.py'), 'utf8');
+    var hash = config.match(/LIBCHROMIUMCONTENT_COMMIT\s*=\s*'(.*)'\s*[\n\r]/)[1];
+    // console.log(hash);
+    return hash;
+}
+
 gulp.task('extract-libchromiumcontent', function(cb) {
     var srcDynamic = Path.join('download', 'libchromiumcontent.zip');
     var srcStatic = Path.join('download', 'libchromiumcontent-static.zip');
@@ -59,16 +65,22 @@ gulp.task('extract-libchromiumcontent', function(cb) {
         process.exit(1);
         return;
     }
-    var destPath = 'vendor/brightray/vendor/download/libchromiumcontent';
+    var destPath = Path.normalize('vendor/brightray/vendor/download/libchromiumcontent');
     Del(destPath).then(function() {
         console.log('cleaned target folder: ' + destPath);
         Fs.ensureDirSync(destPath);
-        var zipDynamic = new AdmZip(srcDynamic);
-        zipDynamic.extractAllTo(destPath, true);
-        var zipStatic = new AdmZip(srcStatic);
-        zipStatic.extractAllTo(destPath, true);
-        Fs.writeFileSync(Path.join(destPath, '.version'), '', {encoding:'utf8'});
-        cb();
+        console.log('start extracting...');
+        Utils.execSync('python ' + Path.join('script', 'extract.py') + ' -s ' + srcDynamic + ' -o ' + destPath);
+        Utils.execSync('python ' + Path.join('script', 'extract.py') + ' -s ' + srcStatic + ' -o ' + destPath);
+        Fs.writeFile(Path.join(destPath, '.version'), get_libchromiumcontent_commit_hash().trim(), 
+            {encoding:'utf8'}, 
+            function(err) {
+                if (err) {
+                    console.log(err);
+                    throw err;
+                }
+                cb();
+            });
     });
 });
 
