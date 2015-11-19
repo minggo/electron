@@ -14,8 +14,8 @@ PLATFORM_KEY = {
   'win32': 'win',
 }[sys.platform]
 
-shared_url = '{0}/{1}/{2}/{3}'.format(BASE_URL, PLATFORM_KEY, get_target_arch(), SHARED_LIBRARY_FILENAME)
-static_url = '{0}/{1}/{2}/{3}'.format(BASE_URL, PLATFORM_KEY, get_target_arch(), STATIC_LIBRARY_FILENAME)
+shared_url = '{0}/{1}/{2}/{3}/{4}'.format(BASE_URL, PLATFORM_KEY, get_target_arch(), LIBCHROMIUMCONTENT_COMMIT, SHARED_LIBRARY_FILENAME)
+static_url = '{0}/{1}/{2}/{3}/{4}'.format(BASE_URL, PLATFORM_KEY, get_target_arch(), LIBCHROMIUMCONTENT_COMMIT, STATIC_LIBRARY_FILENAME)
 
 print('shared library url is: %s' % shared_url)
 print
