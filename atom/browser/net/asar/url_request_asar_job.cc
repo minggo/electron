@@ -9,6 +9,7 @@
 
 #include "atom/common/asar/archive.h"
 #include "atom/common/asar/asar_util.h"
+#include "atom/common/asar/asar_crypto.h"
 #include "atom/common/atom_constants.h"
 #include "base/bind.h"
 #include "base/files/file_util.h"
@@ -44,9 +45,12 @@ URLRequestAsarJob::URLRequestAsarJob(
     : net::URLRequestJob(request, network_delegate),
       type_(TYPE_ERROR),
       remaining_bytes_(0),
-      weak_ptr_factory_(this) {}
+      weak_ptr_factory_(this),
+      decipher_(nullptr){}
 
-URLRequestAsarJob::~URLRequestAsarJob() {}
+URLRequestAsarJob::~URLRequestAsarJob() {
+  delete decipher_;
+}
 
 void URLRequestAsarJob::Initialize(
     const scoped_refptr<base::TaskRunner> file_task_runner,
@@ -86,6 +90,9 @@ void URLRequestAsarJob::InitializeAsarJob(
   archive_ = archive;
   file_path_ = file_path;
   file_info_ = file_info;
+
+  if (base::LowerCaseEqualsASCII(file_path_.Extension(), ".js"))
+    decipher_ = CipherBase::CreateDecipher();
 }
 
 void URLRequestAsarJob::InitializeFileJob(
@@ -149,11 +156,20 @@ bool URLRequestAsarJob::ReadRawData(net::IOBuffer* dest,
                          base::Bind(&URLRequestAsarJob::DidRead,
                                     weak_ptr_factory_.GetWeakPtr(),
                                     make_scoped_refptr(dest)));
+
   if (rv >= 0) {
     // Data is immediately available.
     *bytes_read = rv;
     remaining_bytes_ -= rv;
     DCHECK_GE(remaining_bytes_, 0);
+    
+    // decrypt js files
+    if (type_ == TYPE_ASAR && 
+        base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") &&
+        rv > 0) {
+      DecryptData(dest, rv);
+    }
+
     return true;
   }
 
@@ -340,6 +356,13 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
     DCHECK_GE(remaining_bytes_, 0);
   }
 
+  // decrypt js files
+  if (type_ == TYPE_ASAR && 
+      base::LowerCaseEqualsASCII(file_path_.Extension(), ".js") && 
+      result > 0) {
+    DecryptData(buf.get(), result);
+  }
+
   buf = NULL;
 
   if (result == 0) {
@@ -349,6 +372,13 @@ void URLRequestAsarJob::DidRead(scoped_refptr<net::IOBuffer> buf, int result) {
   }
 
   NotifyReadComplete(result);
+}
+
+void URLRequestAsarJob::DecryptData(net::IOBuffer *buf, int size) {
+  if (remaining_bytes_ == 0)
+    decipher_->Update(buf->data(), size, true);
+  else
+    decipher_->Update(buf->data(), size, false);
 }
 
 }  // namespace asar

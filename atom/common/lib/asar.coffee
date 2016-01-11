@@ -2,6 +2,20 @@ asar = process.binding 'atom_common_asar'
 child_process = require 'child_process'
 path = require 'path'
 util = require 'util'
+crypto = require 'crypto'
+
+# only js files needed to be decrypted
+need_decrypt = (file_path) ->
+  if file_path.substr(-3) is '.js'
+    return true
+  else
+    return false
+
+decrypt_buffer = (buffer) ->
+  ALGORITHM = 'rc4'
+  PASSWORD = 'filr-ball-electron-2015'
+  decipher = crypto.createDecipher ALGORITHM, PASSWORD
+  Buffer.concat [decipher.update(buffer), decipher.final()]
 
 # Cache asar archive objects.
 cachedArchives = {}
@@ -260,6 +274,10 @@ exports.wrapFsWithAsar = (fs) ->
     return notFoundError asarPath, filePath, callback unless fd >= 0
 
     fs.read fd, buffer, 0, info.size, info.offset, (error) ->
+      # decrypt js file
+      if need_decrypt p
+        buffer = decrypt_buffer buffer
+
       callback error, if encoding then buffer.toString encoding else buffer
 
   openSync = fs.openSync
@@ -296,6 +314,11 @@ exports.wrapFsWithAsar = (fs) ->
     notFoundError asarPath, filePath unless fd >= 0
 
     fs.readSync fd, buffer, 0, info.size, info.offset
+     
+    # decrypt js file
+    if need_decrypt p
+      buffer = decrypt_buffer buffer
+
     if encoding then buffer.toString encoding else buffer
 
   readdir = fs.readdir
@@ -345,6 +368,11 @@ exports.wrapFsWithAsar = (fs) ->
     return undefined unless fd >= 0
 
     fs.readSync fd, buffer, 0, info.size, info.offset
+
+    # decrypt js file
+    if need_decrypt p
+      buffer = decrypt_buffer buffer
+
     buffer.toString 'utf8'
 
   internalModuleStat = process.binding('fs').internalModuleStat
