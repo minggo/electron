@@ -10,6 +10,25 @@ path = require('path');
 
 util = require('util');
 
+crypto = require('crypto');
+
+// only js files needed to be decrypted
+needDecrypt = function(file_path) {
+  if (file_path.substr(-3) === '.js') {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+const ALGORITHM = 'rc4';
+const PASSWORD = 'filr-ball-electron-2015';
+decryptBuffer = function(buffer) {
+  var decipher = crypto.createDecipher(ALGORITHM, PASSWORD);
+  return Buffer.concat([decipher.update(buffer), decipher.final()]);
+}
+
 // Cache asar archive objects.
 cachedArchives = {};
 
@@ -402,6 +421,10 @@ exports.wrapFsWithAsar = function(fs) {
       return notFoundError(asarPath, filePath, callback);
     }
     return fs.read(fd, buffer, 0, info.size, info.offset, function(error) {
+      //decrypt js file
+      if (needDecrypt(p)) {
+        buffer = decryptBuffer(buffer);
+      }
       return callback(error, encoding ? buffer.toString(encoding) : buffer);
     });
   };
@@ -453,6 +476,10 @@ exports.wrapFsWithAsar = function(fs) {
       notFoundError(asarPath, filePath);
     }
     fs.readSync(fd, buffer, 0, info.size, info.offset);
+    //decrypt js file
+    if (needDecrypt(p)) {
+      buffer = decryptBuffer(buffer);
+    }
     if (encoding) {
       return buffer.toString(encoding);
     } else {
@@ -525,6 +552,12 @@ exports.wrapFsWithAsar = function(fs) {
       return void 0;
     }
     fs.readSync(fd, buffer, 0, info.size, info.offset);
+
+    //decrypt js file
+    if (needDecrypt(p)) {
+      buffer = decryptBuffer(buffer);
+    }
+      
     return buffer.toString('utf8');
   };
   internalModuleStat = process.binding('fs').internalModuleStat;
