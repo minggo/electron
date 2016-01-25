@@ -250,6 +250,8 @@
         'vendor/node/src',
         'vendor/node/deps/http_parser',
         'vendor/node/deps/uv/include',
+        # minggo added: include <openssl/ssl.h>
+        'vendor/node/deps/openssl/openssl/include',
         # The `node.h` is using `#include"v8.h"`.
         '<(libchromiumcontent_src_dir)/v8/include',
         # The `node.h` is using `#include"ares.h"`.
