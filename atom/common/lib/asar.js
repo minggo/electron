@@ -1,6 +1,6 @@
 (function () {
 var asar, asarStatsToFsStats, cachedArchives, child_process, fakeTime, getOrCreateArchive, gid, invalidArchiveError, nextInode, notDirError, notFoundError, overrideAPI, overrideAPISync, path, splitPath, uid, util,
-  hasProp = {}.hasOwnProperty;
+  hasProp = {}.hasOwnProperty, crypto;
 
 asar = process.binding('atom_common_asar');
 
