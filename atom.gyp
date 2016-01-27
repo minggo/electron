@@ -1,7 +1,7 @@
 {
   'variables': {
-    'project_name%': 'CocosCreator',
-    'product_name%': 'CocosCreator',
+    'project_name%': 'electron',
+    'product_name%': 'Electron',
     'company_name%': 'Chukong Technologies',
     'company_abbr%': 'cocos',
     'version%': '0.36.4',
