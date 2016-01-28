@@ -11,14 +11,9 @@
 #include "base/strings/string_util.h"
 #include "base/threading/thread_restrictions.h"
 
-#include "base/logging.h"
-
 namespace asar {
 
 ScopedTemporaryFile::ScopedTemporaryFile() {
-}
-
-ScopedTemporaryFile::ScopedTemporaryFile(const base::FilePath& path) : original_path_(path) {
 }
 
 ScopedTemporaryFile::~ScopedTemporaryFile() {
@@ -75,7 +70,7 @@ bool ScopedTemporaryFile::InitFromFile(base::File* src,
     return false;
 
   // decrypt js data
-  if (base::LowerCaseEqualsASCII(original_path_.Extension(), ".js"))
+  if (base::LowerCaseEqualsASCII(ext, ".js"))
     CipherBase::DecryptData(buf.data(), len);
 
   return dest.WriteAtCurrentPos(buf.data(), buf.size()) ==
