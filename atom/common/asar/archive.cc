@@ -278,7 +278,7 @@ bool Archive::CopyFileOut(const base::FilePath& path, base::FilePath* out) {
     return true;
   }
 
-  scoped_ptr<ScopedTemporaryFile> temp_file(new ScopedTemporaryFile);
+  scoped_ptr<ScopedTemporaryFile> temp_file(new ScopedTemporaryFile(path));
   base::FilePath::StringType ext = path.Extension();
   if (!temp_file->InitFromFile(&file_, ext, info.offset, info.size))
     return false;
