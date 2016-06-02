@@ -26,6 +26,8 @@ class FileStream;
 
 namespace asar {
 
+class CipherBase;
+
 // Createa a request job according to the file path.
 net::URLRequestJob* CreateJobFromPath(
     const base::FilePath& full_path,
@@ -100,6 +102,9 @@ class URLRequestAsarJob : public net::URLRequestJob {
   // Callback after data is asynchronously read from the file into |buf|.
   void DidRead(scoped_refptr<net::IOBuffer> buf, int result);
 
+  // Decrypt data
+  void DecryptData(net::IOBuffer *buf, int size);
+
   // The type of this job.
   enum JobType {
     TYPE_ERROR,
@@ -122,6 +127,8 @@ class URLRequestAsarJob : public net::URLRequestJob {
   net::Error range_parse_result_;
 
   base::WeakPtrFactory<URLRequestAsarJob> weak_ptr_factory_;
+
+  CipherBase *decipher_;
 
   DISALLOW_COPY_AND_ASSIGN(URLRequestAsarJob);
 };

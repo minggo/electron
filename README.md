@@ -1,3 +1,41 @@
+## 构建说明
+
+### 初始化
+
+首先执行：
+
+```bash
+python script/bootstrap.py -v
+```
+
+如果希望构建64位Windows版本，请执行：
+
+```bash
+python script/bootstrap.py --target_arch=x64
+```
+
+### 构建debug版
+
+```bash
+gulp build-debug
+```
+
+### 构建release版
+
+```bash
+gulp build-release
+```
+
+构建出来的文件在`out/D`和`out/R`目录下。
+
+### 制作Release版压缩包并上传FTP
+
+```bash
+gulp auto-dist
+```
+
+会上传打包好的release版文件到`TestBuilds/Fireball/Electron/vx.xx.x/`目录下。
+
 [![Electron Logo](http://electron.atom.io/images/electron-logo.svg)](http://electron.atom.io/)
 
 [![Travis Build Status](https://travis-ci.org/electron/electron.svg?branch=master)](https://travis-ci.org/electron/electron)

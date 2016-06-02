@@ -28,5 +28,6 @@
 #include "vendor/node/src/node.h"
 #include "vendor/node/src/node_buffer.h"
 #include "vendor/node/src/node_internals.h"
+#include "vendor/node/src/node_crypto.h"
 
 #endif  // ATOM_COMMON_NODE_INCLUDES_H_
