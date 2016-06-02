@@ -56,6 +56,19 @@ function get_libchromiumcontent_commit_hash() {
     return hash;
 }
 
+gulp.task('make-version-file', function (cb) {
+    var destPath = Path.normalize('vendor/brightray/vendor/download/libchromiumcontent');
+   Fs.writeFile(Path.join(destPath, '.version'), get_libchromiumcontent_commit_hash().trim(), 
+    {encoding:'utf8'}, 
+    function(err) {
+        if (err) {
+            console.log(err);
+            throw err;
+        }
+        cb();
+    });
+});
+
 gulp.task('extract-libchromiumcontent', function(cb) {
     var srcDynamic = Path.join('download', 'libchromiumcontent.zip');
     var srcStatic = Path.join('download', 'libchromiumcontent-static.zip');
