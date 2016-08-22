@@ -72,6 +72,9 @@ const char kStandardWindow[] = "standardWindow";
 // Default browser window background color.
 const char kBackgroundColor[] = "backgroundColor";
 
+// Diable openDevTools.
+const char kDisableDevTools[] = "disableDevTools";
+
 // Whether the window should have a shadow.
 const char kHasShadow[] = "hasShadow";
 

@@ -92,6 +92,7 @@ Window::Window(v8::Isolate* isolate, const mate::Dictionary& options) {
 
   // Creates the WebContents used by BrowserWindow.
   auto web_contents = WebContents::Create(isolate, web_preferences);
+
   web_contents_.Reset(isolate, web_contents.ToV8());
   api_web_contents_ = web_contents.get();
 
