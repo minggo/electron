@@ -96,6 +96,9 @@ const char kGuestInstanceID[] = "guestInstanceId";
 // Enable DirectWrite on Windows.
 const char kDirectWrite[] = "directWrite";
 
+// Diable openDevTools.
+const char kDisableDevTools[] = "disableDevTools";
+
 // Web runtime features.
 const char kExperimentalFeatures[]       = "experimentalFeatures";
 const char kExperimentalCanvasFeatures[] = "experimentalCanvasFeatures";

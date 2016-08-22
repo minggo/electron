@@ -242,6 +242,9 @@ WebContents::WebContents(v8::Isolate* isolate,
   options.Get("isGuest", &is_guest);
   type_ = is_guest ? WEB_VIEW : BROWSER_WINDOW;
 
+  // Whether to disable DevTools.
+  options.Get("disableDevTools", &disable_devtools_);
+
   // Obtain the session.
   std::string partition;
   mate::Handle<api::Session> session;
@@ -861,6 +864,9 @@ bool WebContents::SavePage(const base::FilePath& full_file_path,
 
 void WebContents::OpenDevTools(mate::Arguments* args) {
   if (type_ == REMOTE)
+    return;
+
+  if (disable_devtools_)
     return;
 
   std::string state;

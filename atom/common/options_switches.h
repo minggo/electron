@@ -45,6 +45,7 @@ extern const char kStandardWindow[];
 extern const char kBackgroundColor[];
 extern const char kHasShadow[];
 extern const char kWebPreferences[];
+extern const char kDisableDevTools[];
 
 // WebPreferences.
 extern const char kDirectWrite[];
