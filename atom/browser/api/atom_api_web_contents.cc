@@ -233,7 +233,8 @@ WebContents::WebContents(v8::Isolate* isolate,
                          const mate::Dictionary& options)
     : embedder_(nullptr),
       request_id_(0),
-      background_throttling_(true) {
+      background_throttling_(true),
+      disable_devtools_(false) {
   // Read options.
   options.Get("backgroundThrottling", &background_throttling_);
 
