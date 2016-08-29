@@ -270,7 +270,8 @@ WebContents::WebContents(v8::Isolate* isolate,
     : embedder_(nullptr),
       type_(BROWSER_WINDOW),
       request_id_(0),
-      background_throttling_(true) {
+      background_throttling_(true),
+      disable_devtools_(false) {
   // Read options.
   options.Get("backgroundThrottling", &background_throttling_);
 
@@ -286,6 +287,9 @@ WebContents::WebContents(v8::Isolate* isolate,
     type_ = BACKGROUND_PAGE;
   else if (options.Get("offscreen", &b) && b)
     type_ = OFF_SCREEN;
+
+  // Whether to disable DevTools.
+  options.Get("disableDevTools", &disable_devtools_);
 
   // Obtain the session.
   std::string partition;
@@ -935,6 +939,9 @@ bool WebContents::SavePage(const base::FilePath& full_file_path,
 
 void WebContents::OpenDevTools(mate::Arguments* args) {
   if (type_ == REMOTE)
+    return;
+
+  if (disable_devtools_)
     return;
 
   std::string state;
