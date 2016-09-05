@@ -73,7 +73,8 @@ void CipherBase::Init(const char* cipher_type,
                       int key_buf_len) {
   // HandleScope scope(env()->isolate());
 
-  CHECK_EQ(cipher_, nullptr);
+  //CHECK_EQ(cipher_, nullptr);
+  assert(cipher_ == nullptr);
   cipher_ = EVP_get_cipherbyname(cipher_type);
   if (cipher_ == nullptr) {
     // return env()->ThrowError("Unknown cipher");
@@ -166,7 +167,8 @@ bool CipherBase::GetAuthTag(char** out, unsigned int* out_len) const {
     return false;
   *out_len = auth_tag_len_;
   *out = static_cast<char*>(malloc(auth_tag_len_));
-  CHECK_NE(*out, nullptr);
+  //CHECK_NE(*out, nullptr);
+  assert(*out != nullptr);
   memcpy(*out, auth_tag_, auth_tag_len_);
   return true;
 }
